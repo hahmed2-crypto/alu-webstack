@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Displays DNS record type and destination IP for domain subdomains
+
+audit_subdomain() {
+    local sub="$1"
+    local domain="$2"
+    local info
+    info=$(dig "$sub.$domain" | grep -A1 'ANSWER SECTION:' | tail -n 1)
+    # shellcheck disable=SC2086
+    echo "$info" | awk -v s="$sub" '{print "The subdomain " s " is a " $4 " record and points to " $5}'
+}
+
+if [ "$#" -eq 1 ]; then
+    for sub in www lb-01 web-01 web-02; do
+        audit_subdomain "$sub" "$1"
+    done
+elif [ "$#" -eq 2 ]; then
+    audit_subdomain "$2" "$1"
+fi
